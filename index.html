@@ -1,0 +1,421 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Herramientas de Ana</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: one big-print column, home screen of large tiles, one tool per screen with a big "Volver" button. Built for a phone and for easy reading. */
+:root{
+  --bg:#EEF4F6; --surface:#FFFFFF; --ink:#0D2533; --muted:#3E5A69; --line:#C9D8DF;
+  --primary:#0A6878; --primary-ink:#FFFFFF; --sun:#FFC83D; --sun-ink:#2A2000; --good:#17784A; --soft:#DCEEF1; --good-bg:#17784A; --on-good:#FFFFFF;
+  --font:"Atkinson Hyperlegible", "Segoe UI", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1A22; --surface:#13293A; --ink:#F2F7FA; --muted:#B5CAD4; --line:#2C4757;
+  --primary:#5CC8D6; --primary-ink:#06222A; --sun:#FFD45C; --sun-ink:#2A2000; --good:#5FD39A; --soft:#173847; --good-bg:#1D8A56; --on-good:#FFFFFF; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1A22; --surface:#13293A; --ink:#F2F7FA; --muted:#B5CAD4; --line:#2C4757;
+  --primary:#5CC8D6; --primary-ink:#06222A; --sun:#FFD45C; --sun-ink:#2A2000; --good:#5FD39A; --soft:#173847; --good-bg:#1D8A56; --on-good:#FFFFFF; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:20px;line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:16px 48px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{margin:0;line-height:1.2;text-wrap:balance}
+h1{font-size:1.7rem}
+h2{font-size:1.45rem}
+h3{font-size:1.15rem}
+p{margin:0}
+.muted{color:var(--muted)}
+body.lang-en .es{display:none!important}
+body:not(.lang-en) .en{display:none!important}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lang{display:flex;border:3px solid var(--primary);border-radius:999px;overflow:hidden}
+.lang button{font:700 1rem var(--font);padding:10px 16px;border:0;background:var(--surface);color:var(--primary);min-height:48px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--primary);color:var(--primary-ink)}
+
+.hello{background:var(--primary);color:var(--primary-ink);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:8px}
+.hello h1{font-size:1.8rem}
+.hello .big{font-size:1.15rem}
+.price-tag{display:inline-block;background:var(--sun);color:var(--sun-ink);font-weight:700;border-radius:12px;padding:6px 12px;align-self:flex-start}
+
+.tiles{display:grid;grid-template-columns:1fr;gap:14px}
+.tile{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:var(--surface);color:var(--ink);
+  border:3px solid var(--line);border-radius:18px;padding:18px;font:inherit;cursor:pointer;min-height:96px;text-decoration:none}
+.tile:hover,.tile:focus-visible{border-color:var(--primary)}
+.tile .ic{flex:none;width:60px;height:60px;border-radius:16px;background:var(--soft);display:grid;place-items:center;color:var(--primary)}
+.tile .ic svg{width:36px;height:36px}
+.tile .t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile strong{font-size:1.25rem}
+.tile span.d{color:var(--muted);font-size:1rem}
+.tile.sun{border-color:var(--sun)}
+.tile.sun .ic{background:var(--sun);color:var(--sun-ink)}
+
+.back{display:inline-flex;align-items:center;gap:10px;font:700 1.15rem var(--font);background:var(--surface);color:var(--primary);
+  border:3px solid var(--primary);border-radius:14px;padding:12px 18px;min-height:56px;cursor:pointer;align-self:flex-start}
+.back svg{width:26px;height:26px}
+
+.card{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.row .lbl{flex:1 1 160px;min-width:0;font-weight:700}
+.row .lbl small{display:block;font-weight:400;color:var(--muted);font-size:.9rem}
+.step{display:flex;align-items:center;gap:8px}
+.step button{width:56px;height:56px;border-radius:14px;border:0;background:var(--primary);color:var(--primary-ink);font:700 1.8rem var(--font);cursor:pointer;line-height:1}
+.step output{min-width:64px;text-align:center;font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums}
+
+.choices{display:grid;grid-template-columns:1fr;gap:10px}
+.choice{display:flex;justify-content:space-between;align-items:center;gap:10px;font:inherit;text-align:left;padding:14px 16px;border-radius:14px;
+  border:3px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:60px}
+.choice > span{flex:1;min-width:0}
+.choice b{font-variant-numeric:tabular-nums;flex:none}
+.choice[aria-pressed="true"]{border-color:var(--primary);background:var(--soft)}
+.choice[aria-pressed="true"]::before{content:"\2713";font-weight:700;color:var(--primary);margin-right:4px}
+
+.total{background:var(--sun);color:var(--sun-ink);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:4px;position:sticky;bottom:calc(10px + env(safe-area-inset-bottom, 0px));box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.total .n{font-size:2.6rem;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.total .s{font-size:1.05rem}
+
+.msg{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.msg p.text{background:var(--soft);border-radius:12px;padding:14px;white-space:pre-wrap;user-select:text}
+.copy{font:700 1.15rem var(--font);background:var(--primary);color:var(--primary-ink);border:0;border-radius:14px;padding:14px;min-height:58px;cursor:pointer;width:100%}
+.copy.done{background:var(--good-bg);color:var(--on-good)}
+
+.check{display:flex;flex-direction:column;gap:10px}
+.check label{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border:2px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer}
+.check input{width:30px;height:30px;flex:none;margin-top:2px;accent-color:var(--good)}
+.check input:checked + span{color:var(--muted);text-decoration:line-through}
+.reset{font:700 1rem var(--font);background:transparent;color:var(--primary);border:2px solid var(--primary);border-radius:12px;padding:10px 14px;min-height:48px;cursor:pointer;align-self:flex-start}
+.progress{height:16px;background:var(--soft);border-radius:999px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--good);width:0;transition:width .3s}
+
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nums div{background:var(--soft);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.nums b{font-size:1.5rem;font-variant-numeric:tabular-nums}
+.nums div.wide{grid-column:1/-1;background:var(--good-bg);color:var(--on-good)}
+.nums div.wide b{font-size:2rem}
+.note{font-size:.95rem;color:var(--muted)}
+a{color:var(--primary);font-weight:700}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:4px solid var(--sun);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="topbar">
+    <strong class="muted"><span class="es">Limpieza Ana Portillo</span><span class="en">Ana Portillo Cleaning</span></strong>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button id="btn-es" type="button" aria-pressed="true">Español</button>
+      <button id="btn-en" type="button" aria-pressed="false">English</button>
+    </div>
+  </div>
+
+  <!-- INICIO -->
+  <section id="v-inicio" class="view" style="display:flex;flex-direction:column;gap:18px">
+    <div class="hello">
+      <h1><span class="es">¡Hola, Ana!</span><span class="en">Hi, Ana!</span></h1>
+      <p class="big"><span class="es">Toque un botón para empezar.</span><span class="en">Tap a button to start.</span></p>
+      <span class="price-tag"><span class="es">Su precio: $250 cada 2 semanas</span><span class="en">Your price: $250 every 2 weeks</span></span>
+    </div>
+    <div class="tiles">
+      <button class="tile sun" type="button" data-go="cotizar">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h2M14 19h2"/></svg></span>
+        <span class="t"><strong><span class="es">Calcular un precio</span><span class="en">Price a job</span></strong><span class="d"><span class="es">Para un cliente nuevo</span><span class="en">For a new client</span></span></span>
+      </button>
+      <button class="tile" type="button" data-go="mensajes">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8 11h8M8 14h5"/></svg></span>
+        <span class="t"><strong><span class="es">Mensajes listos</span><span class="en">Ready-made messages</span></strong><span class="d"><span class="es">Copiar y pegar en texto o Facebook</span><span class="en">Copy and paste into a text or Facebook</span></span></span>
+      </button>
+      <button class="tile" type="button" data-go="ganancias">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+        <span class="t"><strong><span class="es">Mis ganancias</span><span class="en">My earnings</span></strong><span class="d"><span class="es">¿Cuánto gano con más casas?</span><span class="en">How much with more homes?</span></span></span>
+      </button>
+      <button class="tile" type="button" data-go="limpieza">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M6 21V10l6-6 6 6v11"/><path d="M10 21v-6h4v6"/></svg></span>
+        <span class="t"><strong><span class="es">Lista de limpieza</span><span class="en">Cleaning checklist</span></strong><span class="d"><span class="es">Cuarto por cuarto, para usted o su ayudante</span><span class="en">Room by room, for you or a helper</span></span></span>
+      </button>
+      <button class="tile" type="button" data-go="plan">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15l2 2 4-4"/></svg></span>
+        <span class="t"><strong><span class="es">Mis tareas del mes</span><span class="en">My tasks this month</span></strong><span class="d"><span class="es">10 pasos para hacer crecer el negocio</span><span class="en">10 steps to grow the business</span></span></span>
+      </button>
+      <a class="tile" href="https://claude.ai/artifact/T7NQ99gm1Ypp3ChN4M8cgV" target="_blank" rel="noopener">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></span>
+        <span class="t"><strong><span class="es">Ver el plan completo</span><span class="en">Read the full plan</span></strong><span class="d"><span class="es">El plan de negocio con dibujos (necesita cuenta de Claude)</span><span class="en">The business plan with pictures (needs a Claude account)</span></span></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- COTIZAR -->
+  <section id="v-cotizar" class="view" hidden style="flex-direction:column;gap:18px">
+    <button class="back" type="button" data-go="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span class="es">Volver</span><span class="en">Back</span></button>
+    <h2><span class="es">Calcular un precio</span><span class="en">Price a job</span></h2>
+    <div class="card">
+      <h3><span class="es">1. ¿Qué tipo de limpieza?</span><span class="en">1. What kind of cleaning?</span></h3>
+      <div class="choices" id="plan-choices"></div>
+    </div>
+    <div class="card">
+      <h3><span class="es">2. ¿Qué tan grande es la casa?</span><span class="en">2. How big is the home?</span></h3>
+      <div class="row"><span class="lbl"><span class="es">Cuartos</span><span class="en">Bedrooms</span></span>
+        <div class="step" data-key="beds" data-min="1" data-max="8" data-step="1"><button type="button" aria-label="menos / less">−</button><output>3</output><button type="button" aria-label="más / more">+</button></div></div>
+      <div class="row"><span class="lbl"><span class="es">Baños</span><span class="en">Bathrooms</span></span>
+        <div class="step" data-key="baths" data-min="1" data-max="6" data-step="1"><button type="button" aria-label="menos / less">−</button><output>2</output><button type="button" aria-label="más / more">+</button></div></div>
+      <p class="note"><span class="es">Precio base para 3 cuartos y 2 baños. Cada cuarto o baño extra: +$25.</span><span class="en">Base price is for 3 bedrooms and 2 baths. Each extra bedroom or bath: +$25.</span></p>
+    </div>
+    <div class="card">
+      <h3><span class="es">3. Servicios extra</span><span class="en">3. Extra services</span></h3>
+      <div class="row"><span class="lbl"><span class="es">Ropa: lavar y doblar</span><span class="en">Laundry: wash and fold</span><small><span class="es">$25 por carga</span><span class="en">$25 per load</span></small></span>
+        <div class="step" data-key="laundry" data-min="0" data-max="6" data-step="1"><button type="button" aria-label="menos / less">−</button><output>0</output><button type="button" aria-label="más / more">+</button></div></div>
+      <div class="row"><span class="lbl"><span class="es">Cambiar sábanas</span><span class="en">Change bedding</span><small><span class="es">$15 por cama</span><span class="en">$15 per bed</span></small></span>
+        <div class="step" data-key="bedding" data-min="0" data-max="8" data-step="1"><button type="button" aria-label="menos / less">−</button><output>0</output><button type="button" aria-label="más / more">+</button></div></div>
+      <div class="row"><span class="lbl"><span class="es">Quehaceres de la casa</span><span class="en">Home chores</span><small><span class="es">$40 por hora</span><span class="en">$40 per hour</span></small></span>
+        <div class="step" data-key="chores" data-min="0" data-max="6" data-step="1"><button type="button" aria-label="menos / less">−</button><output>0</output><button type="button" aria-label="más / more">+</button></div></div>
+      <div class="row"><span class="lbl"><span class="es">Ventanas por dentro</span><span class="en">Inside windows</span><small><span class="es">$5 cada una</span><span class="en">$5 each</span></small></span>
+        <div class="step" data-key="windows" data-min="0" data-max="40" data-step="1"><button type="button" aria-label="menos / less">−</button><output>0</output><button type="button" aria-label="más / more">+</button></div></div>
+      <div class="choices" id="addon-choices"></div>
+    </div>
+    <div class="total" aria-live="polite">
+      <span class="s"><span class="es">Precio por visita</span><span class="en">Price per visit</span></span>
+      <span class="n" id="q-total">$250</span>
+      <span class="s" id="q-month"></span>
+    </div>
+  </section>
+
+  <!-- MENSAJES -->
+  <section id="v-mensajes" class="view" hidden style="flex-direction:column;gap:18px">
+    <button class="back" type="button" data-go="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span class="es">Volver</span><span class="en">Back</span></button>
+    <h2><span class="es">Mensajes listos</span><span class="en">Ready-made messages</span></h2>
+    <p class="muted"><span class="es">Toque el botón azul para copiar. Luego abra su texto o Facebook, mantenga el dedo y toque “Pegar”. Cambie [nombre] por el nombre del cliente.</span><span class="en">Tap the blue button to copy. Then open your text or Facebook, press and hold, and tap “Paste”. Replace [name] with the client’s name.</span></p>
+    <div id="msg-list" style="display:flex;flex-direction:column;gap:16px"></div>
+  </section>
+
+  <!-- GANANCIAS -->
+  <section id="v-ganancias" class="view" hidden style="flex-direction:column;gap:18px">
+    <button class="back" type="button" data-go="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span class="es">Volver</span><span class="en">Back</span></button>
+    <h2><span class="es">Mis ganancias</span><span class="en">My earnings</span></h2>
+    <div class="card">
+      <div class="row"><span class="lbl"><span class="es">Casas fijas</span><span class="en">Regular homes</span><small><span class="es">cada 2 semanas</span><span class="en">every 2 weeks</span></small></span>
+        <div class="step" data-key="homes" data-min="1" data-max="100" data-step="1"><button type="button" aria-label="menos / less">−</button><output>7</output><button type="button" aria-label="más / more">+</button></div></div>
+      <div class="row"><span class="lbl"><span class="es">Precio por visita</span><span class="en">Price per visit</span></span>
+        <div class="step" data-key="price" data-min="100" data-max="500" data-step="10" data-money="1"><button type="button" aria-label="menos / less">−</button><output>$250</output><button type="button" aria-label="más / more">+</button></div></div>
+      <div class="row"><span class="lbl"><span class="es">Extras por visita (promedio)</span><span class="en">Extras per visit (average)</span><small><span class="es">ropa, sábanas, quehaceres</span><span class="en">laundry, bedding, chores</span></small></span>
+        <div class="step" data-key="extra" data-min="0" data-max="200" data-step="5" data-money="1"><button type="button" aria-label="menos / less">−</button><output>$0</output><button type="button" aria-label="más / more">+</button></div></div>
+      <div class="row"><span class="lbl"><span class="es">Ayudantes (medio tiempo)</span><span class="en">Helpers (part-time)</span><small><span class="es">unos $1,300 al mes cada una</span><span class="en">about $1,300 a month each</span></small></span>
+        <div class="step" data-key="helpers" data-min="0" data-max="12" data-step="1"><button type="button" aria-label="menos / less">−</button><output>0</output><button type="button" aria-label="más / more">+</button></div></div>
+    </div>
+    <div class="nums" aria-live="polite">
+      <div><span><span class="es">Entra al mes</span><span class="en">Comes in per month</span></span><b id="g-month">$0</b></div>
+      <div><span><span class="es">Entra al año</span><span class="en">Comes in per year</span></span><b id="g-year">$0</b></div>
+      <div class="wide"><span><span class="es">Le queda a usted al mes (aprox.)</span><span class="en">You keep per month (approx.)</span></span><b id="g-keep">$0</b></div>
+    </div>
+    <p class="note" id="g-tip"></p>
+    <p class="note"><span class="es">Es un cálculo aproximado, antes de impuestos. Resta unos 10% para productos, gasolina y seguro.</span><span class="en">Rough estimate, before taxes. Takes off about 10% for supplies, gas and insurance.</span></p>
+  </section>
+
+  <!-- LIMPIEZA -->
+  <section id="v-limpieza" class="view" hidden style="flex-direction:column;gap:18px">
+    <button class="back" type="button" data-go="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span class="es">Volver</span><span class="en">Back</span></button>
+    <h2><span class="es">Lista de limpieza</span><span class="en">Cleaning checklist</span></h2>
+    <div class="progress" aria-hidden="true"><i id="clean-bar"></i></div>
+    <div id="clean-list" style="display:flex;flex-direction:column;gap:18px"></div>
+    <button class="reset" type="button" id="clean-reset"><span class="es">Empezar otra casa (borrar marcas)</span><span class="en">Start next home (clear checks)</span></button>
+  </section>
+
+  <!-- PLAN -->
+  <section id="v-plan" class="view" hidden style="flex-direction:column;gap:18px">
+    <button class="back" type="button" data-go="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span class="es">Volver</span><span class="en">Back</span></button>
+    <h2><span class="es">Mis tareas del mes</span><span class="en">My tasks this month</span></h2>
+    <p class="muted" id="plan-count"></p>
+    <div class="progress" aria-hidden="true"><i id="plan-bar"></i></div>
+    <div class="check" id="plan-list"></div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var store = {
+    get:function(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}},
+    set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  };
+  var money = function(n){return '$'+Math.round(n).toLocaleString('en-US');};
+  var lang = store.get('ana-lang','es');
+  function setLang(l){
+    lang=l; document.body.classList.toggle('lang-en', l==='en');
+    document.documentElement.lang = l;
+    document.getElementById('btn-es').setAttribute('aria-pressed', l==='es');
+    document.getElementById('btn-en').setAttribute('aria-pressed', l==='en');
+    store.set('ana-lang', l); renderQuote(); renderEarn(); renderPlanCount();
+  }
+  document.getElementById('btn-es').onclick=function(){setLang('es');};
+  document.getElementById('btn-en').onclick=function(){setLang('en');};
+
+  /* navigation */
+  var views=['inicio','cotizar','mensajes','ganancias','limpieza','plan'];
+  function show(name){
+    if(views.indexOf(name)<0) name='inicio';
+    views.forEach(function(v){var el=document.getElementById('v-'+v); el.hidden = v!==name; el.style.display = v===name?'flex':'none';});
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(){var g=b.getAttribute('data-go'); if(location.hash!=='#'+g){location.hash=g;} else show(g);});});
+  window.addEventListener('hashchange',function(){show(location.hash.slice(1));});
+
+  /* steppers */
+  var state={beds:3,baths:2,laundry:0,bedding:0,chores:0,windows:0,homes:7,price:250,extra:0,helpers:0};
+  document.querySelectorAll('.step').forEach(function(s){
+    var key=s.dataset.key,min=+s.dataset.min,max=+s.dataset.max,st=+s.dataset.step,isMoney=!!s.dataset.money;
+    var out=s.querySelector('output'),btns=s.querySelectorAll('button');
+    function paint(){out.textContent = isMoney?money(state[key]):state[key];}
+    btns[0].onclick=function(){state[key]=Math.max(min,state[key]-st);paint();renderQuote();renderEarn();};
+    btns[1].onclick=function(){state[key]=Math.min(max,state[key]+st);paint();renderQuote();renderEarn();};
+    paint();
+  });
+
+  /* quote */
+  var plans=[
+    {id:'biweekly',es:'Cada 2 semanas',en:'Every 2 weeks',p:250,perMonth:26/12},
+    {id:'helper',es:'Ayuda en Casa cada 2 semanas (limpieza + 1 carga de ropa + sábanas + 30 min de quehaceres)',en:'Home Helper every 2 weeks (clean + 1 laundry load + bedding + 30 min chores)',p:325,perMonth:26/12},
+    {id:'weekly',es:'Cada semana',en:'Every week',p:225,perMonth:52/12},
+    {id:'monthly',es:'Una vez al mes',en:'Once a month',p:290,perMonth:1},
+    {id:'deep',es:'Limpieza profunda (primera vez)',en:'Deep clean (first time)',p:400,perMonth:0},
+    {id:'move',es:'Mudanza (casa vacía)',en:'Move-out (empty home)',p:475,perMonth:0}
+  ];
+  var addons=[
+    {id:'fridge',es:'Dentro del refrigerador',en:'Inside the fridge',p:35},
+    {id:'oven',es:'Dentro del horno',en:'Inside the oven',p:35},
+    {id:'cabinets',es:'Dentro de gabinetes',en:'Inside cabinets',p:40}
+  ];
+  var chosenPlan='biweekly', chosenAdd={};
+  var pc=document.getElementById('plan-choices'), ac=document.getElementById('addon-choices');
+  plans.forEach(function(p){
+    var b=document.createElement('button'); b.type='button'; b.className='choice'; b.dataset.id=p.id;
+    b.innerHTML='<span><span class="es">'+p.es+'</span><span class="en">'+p.en+'</span></span><b>'+money(p.p)+'</b>';
+    b.onclick=function(){chosenPlan=p.id; renderQuote();}; pc.appendChild(b);
+  });
+  addons.forEach(function(a){
+    var b=document.createElement('button'); b.type='button'; b.className='choice'; b.dataset.id=a.id;
+    b.innerHTML='<span><span class="es">'+a.es+'</span><span class="en">'+a.en+'</span></span><b>+'+money(a.p)+'</b>';
+    b.onclick=function(){chosenAdd[a.id]=!chosenAdd[a.id]; renderQuote();}; ac.appendChild(b);
+  });
+  function renderQuote(){
+    var plan=plans.filter(function(p){return p.id===chosenPlan;})[0];
+    pc.querySelectorAll('.choice').forEach(function(b){b.setAttribute('aria-pressed', b.dataset.id===chosenPlan);});
+    ac.querySelectorAll('.choice').forEach(function(b){b.setAttribute('aria-pressed', !!chosenAdd[b.dataset.id]);});
+    var size=Math.max(-50,(state.beds-3+state.baths-2)*25);
+    var extras=state.laundry*25+state.bedding*15+state.chores*40+state.windows*5;
+    addons.forEach(function(a){if(chosenAdd[a.id]) extras+=a.p;});
+    var total=plan.p+size+extras;
+    document.getElementById('q-total').textContent=money(total);
+    var m=document.getElementById('q-month');
+    if(plan.perMonth){m.textContent=(lang==='es'?'Más o menos ':'About ')+money(total*plan.perMonth)+(lang==='es'?' al mes':' a month');}
+    else {m.textContent=lang==='es'?'Pago de una sola vez':'One-time price';}
+  }
+
+  /* earnings */
+  function renderEarn(){
+    var month=state.homes*(state.price+state.extra)*26/12;
+    var keep=month*0.9-state.helpers*1300;
+    document.getElementById('g-month').textContent=money(month);
+    document.getElementById('g-year').textContent=money(month*12);
+    document.getElementById('g-keep').textContent=money(keep);
+    var tip=document.getElementById('g-tip');
+    var need = state.homes>=12 && state.helpers===0;
+    tip.textContent = need ? (lang==='es'?'Con 12 casas o más, es hora de buscar una ayudante.':'At 12 or more homes, it is time to find a helper.') : '';
+  }
+
+  /* messages */
+  var msgs=[
+    {es_t:'Pedir una recomendación',en_t:'Ask for a referral',
+     es:'¡Hola [nombre]! Gracias por confiar en mí para limpiar su casa. Si conoce a alguien que necesite limpieza, me encantaría ayudarle. Por cada persona que me recomiende y se haga cliente, usted recibe $25 de descuento, y su amigo o amiga también. ¡Muchas gracias! – Ana',
+     en:'Hi [name]! Thank you for trusting me with your home. If you know anyone who needs a cleaner, I would love to help. For every friend you refer who becomes a client, you get $25 off, and so do they. Thank you so much! – Ana'},
+    {es_t:'Pedir una reseña en Google',en_t:'Ask for a Google review',
+     es:'¡Hola [nombre]! Espero que esté feliz con la limpieza de hoy. ¿Me ayudaría dejando una reseña en Google? Solo toma un minuto y me ayuda mucho: [enlace]. ¡Muchas gracias! – Ana',
+     en:'Hi [name]! I hope you are happy with today’s cleaning. Would you help me by leaving a Google review? It only takes a minute and helps me a lot: [link]. Thank you so much! – Ana'},
+    {es_t:'Ofrecer servicios extra',en_t:'Offer extra services',
+     es:'¡Hola [nombre]! Ahora también ofrezco lavar y doblar ropa, cambiar sábanas, limpiar dentro del refrigerador y ayudar con quehaceres de la casa. También tengo el paquete Ayuda en Casa: limpieza, una carga de ropa, sábanas y 30 minutos de quehaceres por $325. ¿Le gustaría agregar algo en su próxima visita? – Ana',
+     en:'Hi [name]! I now also offer laundry, changing bedding, cleaning inside the fridge, and help with chores around the house. I also have the Home Helper package: cleaning, one load of laundry, bedding and 30 minutes of chores for $325. Would you like to add anything to your next visit? – Ana'},
+    {es_t:'Contestar a un cliente nuevo',en_t:'Reply to a new client',
+     es:'¡Hola! Gracias por escribirme. Me llamo Ana y limpio casas en el norte de Virginia. Hablo español e inglés. Para darle un precio: ¿cuántos cuartos y baños tiene su casa, y cada cuánto quiere la limpieza? La limpieza cada 2 semanas empieza en $250. – Ana',
+     en:'Hi! Thank you for reaching out. My name is Ana and I clean homes in Northern Virginia. I speak English and Spanish. To give you a price: how many bedrooms and bathrooms do you have, and how often would you like cleaning? Cleaning every 2 weeks starts at $250. – Ana'},
+    {es_t:'Recordar la cita',en_t:'Appointment reminder',
+     es:'¡Hola [nombre]! Le recuerdo que mañana, [día] a las [hora], voy a limpiar su casa. Si necesita cambiar la cita, avíseme por favor. ¡Gracias! – Ana',
+     en:'Hi [name]! Just a reminder that I will clean your home tomorrow, [day] at [time]. If you need to change the appointment, please let me know. Thank you! – Ana'},
+    {es_t:'Publicación para Facebook',en_t:'Facebook post',
+     es:'¿Busca quién limpie su casa en el norte de Virginia? Soy Ana y limpio casas con cuidado y confianza. Limpieza cada semana, cada 2 semanas o una vez al mes. También lavo ropa, cambio sábanas, limpio refrigeradores y ayudo con quehaceres. Hablo español e inglés. ¡Escríbame para un precio!',
+     en:'Looking for someone to clean your home in Northern Virginia? I’m Ana, and I clean homes with care you can trust. Weekly, every 2 weeks, or monthly. I also do laundry, bedding, inside fridges and household chores. I speak English and Spanish. Message me for a price!'}
+  ];
+  var ml=document.getElementById('msg-list');
+  msgs.forEach(function(m){
+    var card=document.createElement('div'); card.className='msg';
+    card.innerHTML='<h3><span class="es"></span><span class="en"></span></h3><p class="text es"></p><p class="text en"></p><button type="button" class="copy"><span class="es">Copiar mensaje</span><span class="en">Copy message</span></button>';
+    card.querySelector('h3 .es').textContent=m.es_t; card.querySelector('h3 .en').textContent=m.en_t;
+    card.querySelector('p.text.es').textContent=m.es; card.querySelector('p.text.en').textContent=m.en;
+    var btn=card.querySelector('.copy');
+    btn.onclick=function(){
+      var txt= lang==='en'?m.en:m.es;
+      var ok=function(){btn.classList.add('done'); btn.innerHTML='<span class="es">✓ Copiado. Ahora péguelo.</span><span class="en">✓ Copied. Now paste it.</span>'; setTimeout(function(){btn.classList.remove('done'); btn.innerHTML='<span class="es">Copiar mensaje</span><span class="en">Copy message</span>';},3000);};
+      var fallback=function(){var p=card.querySelector(lang==='en'?'p.text.en':'p.text.es'); var r=document.createRange(); r.selectNodeContents(p); var s=window.getSelection(); s.removeAllRanges(); s.addRange(r); btn.innerHTML='<span class="es">Texto marcado: toque “Copiar”</span><span class="en">Text selected: tap “Copy”</span>';};
+      try{ navigator.clipboard.writeText(txt).then(ok,fallback);}catch(e){fallback();}
+    };
+    ml.appendChild(card);
+  });
+
+  /* checklists */
+  function buildChecks(container, items, key, bar, after){
+    var saved=store.get(key,{});
+    items.forEach(function(it,i){
+      if(it.room){var h=document.createElement('h3'); h.innerHTML='<span class="es">'+it.es+'</span><span class="en">'+it.en+'</span>'; container.appendChild(h); return;}
+      var l=document.createElement('label'); var id=key+'-'+i;
+      l.innerHTML='<input type="checkbox" id="'+id+'"><span><span class="es">'+it.es+'</span><span class="en">'+it.en+'</span></span>';
+      var cb=l.querySelector('input'); cb.checked=!!saved[i];
+      cb.onchange=function(){saved[i]=cb.checked; store.set(key,saved); paint();};
+      container.appendChild(l);
+    });
+    function paint(){var all=container.querySelectorAll('input'), done=container.querySelectorAll('input:checked'); bar.style.width=(all.length?done.length/all.length*100:0)+'%'; if(after) after(done.length,all.length);}
+    paint();
+    return {reset:function(){saved={}; store.set(key,saved); container.querySelectorAll('input').forEach(function(c){c.checked=false;}); paint();}, paint:paint};
+  }
+  var cleanItems=[
+    {room:1,es:'Cocina',en:'Kitchen'},
+    {es:'Limpiar mostradores y la estufa',en:'Wipe counters and stovetop'},
+    {es:'Microondas por dentro y por fuera',en:'Microwave inside and out'},
+    {es:'Fregadero y llave brillantes',en:'Sink and faucet shining'},
+    {es:'Frente de electrodomésticos y gabinetes',en:'Fronts of appliances and cabinets'},
+    {es:'Sacar la basura',en:'Take out the trash'},
+    {es:'Aspirar y trapear el piso',en:'Vacuum and mop the floor'},
+    {room:1,es:'Baños',en:'Bathrooms'},
+    {es:'Inodoro por dentro y por fuera',en:'Toilet inside and out'},
+    {es:'Ducha y tina',en:'Shower and tub'},
+    {es:'Lavamanos y espejo',en:'Sink and mirror'},
+    {es:'Toallas dobladas, basura vacía',en:'Towels folded, trash emptied'},
+    {es:'Trapear el piso',en:'Mop the floor'},
+    {room:1,es:'Cuartos y sala',en:'Bedrooms and living room'},
+    {es:'Quitar el polvo (muebles, lámparas, marcos)',en:'Dust furniture, lamps and frames'},
+    {es:'Tender camas (cambiar sábanas si lo pidieron)',en:'Make beds (change bedding if requested)'},
+    {es:'Acomodar cojines y cosas sueltas',en:'Straighten cushions and loose items'},
+    {es:'Aspirar alfombras y pisos',en:'Vacuum rugs and floors'},
+    {room:1,es:'Antes de salir',en:'Before leaving'},
+    {es:'Revisar la casa una última vez',en:'Walk through the whole home one last time'},
+    {es:'Apagar luces y cerrar con llave',en:'Turn off lights and lock the door'},
+    {es:'Mandar texto al cliente: “¡Listo!” (y pedir reseña)',en:'Text the client “All done!” (and ask for a review)'}
+  ];
+  var c1=buildChecks(document.getElementById('clean-list'), cleanItems, 'ana-clean', document.getElementById('clean-bar'));
+  document.getElementById('clean-reset').onclick=c1.reset;
+
+  var planItems=[
+    {es:'Semana 1: Escoger el nombre del negocio y crear la LLC (sitio de Virginia SCC)',en:'Week 1: Pick a business name and form the LLC (Virginia SCC website)'},
+    {es:'Semana 1: Sacar el EIN gratis en IRS.gov y abrir cuenta de banco del negocio',en:'Week 1: Get a free EIN at IRS.gov and open a business bank account'},
+    {es:'Semana 1: Pedir precio de seguro y fianza',en:'Week 1: Get a quote for insurance and a bond'},
+    {es:'Semana 2: Crear el Perfil de Google con fotos y “Se habla español”',en:'Week 2: Set up Google Business Profile with photos and “Se habla español”'},
+    {es:'Semana 2: Pedir a mis 7 clientes una reseña en Google',en:'Week 2: Ask my 7 clients for a Google review'},
+    {es:'Semana 2: Ofrecer Ayuda en Casa ($325) y extras a mis clientes',en:'Week 2: Offer Home Helper ($325) and extras to my clients'},
+    {es:'Semana 3: Imprimir 250 tarjetas de recomendación ($25 y $25)',en:'Week 3: Print 250 referral cards ($25 and $25)'},
+    {es:'Semana 3: Crear página de negocio en Facebook y Nextdoor, con 3 fotos de antes y después',en:'Week 3: Create Facebook and Nextdoor business pages with 3 before-and-after photos'},
+    {es:'Semana 4: Escribir a 10 agentes de bienes raíces sobre limpiezas de mudanza',en:'Week 4: Contact 10 realtors about move-out cleans'},
+    {es:'Semana 4: Pensar en 3 personas de confianza para ser mi primera ayudante',en:'Week 4: List 3 trusted people who could be my first helper'}
+  ];
+  var planDone=0, planAll=10;
+  function renderPlanCount(){var el=document.getElementById('plan-count'); if(el) el.textContent= lang==='es' ? ('Lleva '+planDone+' de '+planAll+' tareas. ¡Usted puede!') : ('Done '+planDone+' of '+planAll+' tasks. You can do it!');}
+  buildChecks(document.getElementById('plan-list'), planItems, 'ana-plan', document.getElementById('plan-bar'), function(d,a){planDone=d; planAll=a; renderPlanCount();});
+
+  setLang(lang);
+  show(location.hash.slice(1)||'inicio');
+})();
+</script>
