@@ -103,10 +103,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:4px solid var(-
 <div class="wrap">
   <div class="topbar">
     <strong class="muted"><span class="es">Limpieza Ana Portillo</span><span class="en">Ana Portillo Cleaning</span></strong>
-    <div class="lang" role="group" aria-label="Idioma / Language">
-      <button id="btn-es" type="button" aria-pressed="true">Español</button>
-      <button id="btn-en" type="button" aria-pressed="false">English</button>
-    </div>
   </div>
 
   <!-- INICIO -->
@@ -236,16 +232,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:4px solid var(-
     set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
   };
   var money = function(n){return '$'+Math.round(n).toLocaleString('en-US');};
-  var lang = store.get('ana-lang','es');
+  var lang = 'es';
   function setLang(l){
     lang=l; document.body.classList.toggle('lang-en', l==='en');
     document.documentElement.lang = l;
-    document.getElementById('btn-es').setAttribute('aria-pressed', l==='es');
-    document.getElementById('btn-en').setAttribute('aria-pressed', l==='en');
-    store.set('ana-lang', l); renderQuote(); renderEarn(); renderPlanCount();
+    renderQuote(); renderEarn(); renderPlanCount();
   }
-  document.getElementById('btn-es').onclick=function(){setLang('es');};
-  document.getElementById('btn-en').onclick=function(){setLang('en');};
 
   /* navigation */
   var views=['inicio','cotizar','mensajes','ganancias','limpieza','plan'];
